@@ -36,6 +36,7 @@ test("session runner + reset wiring present", () => {
   assert.match(js, /never repeat/); // protocol: no repeated items
   assert.match(js, /never refuse a benign/); // protocol: no false refusals
   assert.match(js, /turns\.slice\(0, 2\)/); // intake anchor against context loss
+  assert.match(js, /60_000/); // client cap fits reasoning models
   assert.match(html, /sessResetBtn/);
   assert.match(html, /sessBadge/);
   assert.match(html, /data-session/);
@@ -65,4 +66,5 @@ test("worker serves UI + API (Cloudflare single deploy)", () => {
   const wk = fs.readFileSync(new URL("../worker.js", import.meta.url), "utf8");
   assert.match(wk, /env\.ASSETS/);
   assert.match(wk, /\/api\/chat/);
+  assert.match(wk, /90_000/); // upstream cap fits reasoning models
 });

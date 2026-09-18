@@ -6,5 +6,9 @@
   "assets": {
     "directory": "./out",
     "not_found_handling": "single-page-application"
+  },
+  "vars": {
+    "NIM_API_URL": "https://integrate.api.nvidia.com/v1/chat/completions",
+    "NIM_MODEL": "deepseek-ai/deepseek-v4-flash-0731"
   }
 }

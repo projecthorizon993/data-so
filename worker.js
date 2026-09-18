@@ -57,7 +57,7 @@ export default {
     const max_tokens = Math.max(32, Math.min(Number(body.max_tokens) || 256, 512));
 
     const ctrl = new AbortController();
-    const killer = setTimeout(() => ctrl.abort(), 25_000);
+    const killer = setTimeout(() => ctrl.abort(), 90_000); // reasoning models think before speaking
     let up;
     try {
       up = await fetch(NIM_URL, {

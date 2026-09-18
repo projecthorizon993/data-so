@@ -225,7 +225,13 @@ async function ask(prompt) {
     persist(); renderList(); paint(); latencyEl.textContent = "cached"; return;
   }
   ctrl?.abort(); ctrl = new AbortController();
-  const killer = setTimeout(() => ctrl.abort("timeout"), 25_000);
+  const killer = setTimeout(() => ctrl.abort("timeout"), 60_000); // reasoning models need room
+  const t0 = performance.now();
+  const tick = setInterval(() => {
+    const s = Math.round((performance.now() - t0) / 1000);
+    statusEl.hidden = false;
+    statusEl.textContent = s < 3 ? "thinking…" : `thinking… ${s}s (reasoning model — text follows)`;
+  }, 1000);
   const item = session && !session.done ? currentItem() : null;
   let userContent = prompt;
   if (item) {
@@ -234,8 +240,7 @@ async function ask(prompt) {
   }
   const messages = budget([...c.msgs.slice(-12), { role: "user", content: userContent }], SYSTEM);
   // Free-tier guard: small completion cap. Fixed prompt rides in `system`.
-  const payload = JSON.stringify({ messages, system: SYSTEM, model: CFG.model || undefined, stream: true, max_tokens: 256 });
-  const t0 = performance.now();
+  const payload = JSON.stringify({ messages, system: SYSTEM, model: CFG.model || undefined, stream: true, max_tokens: 384 });
   const row = bubble("assistant", '<span class="typing"><i></i><i></i><i></i></span>');
   const el = row.querySelector(".msg"); el.classList.add("streaming");
   log.appendChild(row); log.scrollTop = log.scrollHeight;
@@ -280,7 +285,7 @@ async function ask(prompt) {
         const r2 = await fetch(CFG.api, {
           method: "POST", signal: ctrl.signal,
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ messages, system: SYSTEM, stream: false, max_tokens: 256 }),
+          body: JSON.stringify({ messages, system: SYSTEM, stream: false, max_tokens: 384 }),
         });
         acc = (await r2.json())?.choices?.[0]?.message?.content || "";
       } catch {}
@@ -305,14 +310,15 @@ async function ask(prompt) {
     persist(); renderList();
     log.scrollTop = log.scrollHeight;
   } catch (e) {
-    if (e?.name === "AbortError") { row.remove(); say(e?.message === "timeout" ? "Stopped — 25s limit" : "Stopped"); }
+    if (e?.name === "AbortError") { row.remove(); say(e?.message === "timeout" ? "Stopped — 60s limit" : "Stopped"); }
     else {
       el.classList.remove("streaming");
       el.innerHTML = `<em>⚠️ ${esc(String(e.message || e))}</em><div class="meta"><span>backend env: NIM_API_URL + NIM_API_KEY (+ NIM_MODEL)</span></div>`;
       say("Request failed");
     }
   } finally {
-    clearTimeout(killer); liveDot.classList.remove("busy");
+    clearTimeout(killer); clearInterval(tick); statusEl.hidden = true;
+    liveDot.classList.remove("busy");
     stopBtn.hidden = true; sendBtn.disabled = false; input.focus();
   }
 }
