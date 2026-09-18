@@ -1,0 +1,14 @@
+{
+  "name": "nim-chat-static",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Fast Git-centric static chat bot backed by NVIDIA NIM",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "PORT=3000 node server.js",
+    "build": "node scripts/build.mjs",
+    "vercel-build": "node scripts/build.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

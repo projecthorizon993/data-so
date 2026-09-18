@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NIM Chat — Fast AI on Vercel Edge</title>
+<meta name="description" content="Blazing-fast static chat UI on Vercel Edge + NVIDIA NIM. Streaming, cached, tiny bundle.">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6f7f9">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#07090d">
+<meta property="og:title" content="NIM Chat">
+<meta property="og:description" content="Static chat UI → Vercel Edge → NVIDIA NIM. Streaming + cached.">
+<meta property="og:type" content="website">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2376b900'/%3E%3Cstop offset='1' stop-color='%2338bdf8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='%2307090d'/%3E%3Cpath d='M9 11h14v8H15l-6 5z' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="./assets/styles.css">
+<script>try{const t=localStorage.getItem("nim-theme");if(t)document.documentElement.dataset.theme=t;else if(matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.dataset.theme="light"}catch(e){}</script>
+<script type="application/json" id="boot-config">{"apiEndpoint":"/api/chat","model":"","maxModelLen":1024,"stream":true,"cacheSize":100}</script>
+</head>
+<body>
+<div class="bg" aria-hidden="true"><span class="orb o1"></span><span class="orb o2"></span><span class="grid"></span></div>
+<div id="app">
+  <aside id="side" class="side" aria-label="Conversations">
+    <div class="side-head">
+      <div class="brand"><span class="logo" aria-hidden="true">✦</span><div><strong>NIM Chat</strong><small>Vercel Edge · NIM</small></div></div>
+      <button id="newChat" class="btn primary sm" type="button" title="New chat (N)">+ New</button>
+    </div>
+    <div id="chatList" class="chat-list" role="listbox" aria-label="Saved chats"></div>
+    <div class="side-foot">
+      <div class="pill" id="modelPill" title="Backend model">● nim · 8b</div>
+      <button id="themeBtn" class="btn ghost sm" type="button" title="Toggle theme">◐ Theme</button>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+  <main class="main">
+    <header class="topbar">
+      <button id="menuBtn" class="icon-btn" type="button" aria-label="Menu">☰</button>
+      <div class="title"><span class="live" id="liveDot"></span><span id="convTitle">New conversation</span></div>
+      <div class="top-actions">
+        <span id="latency" class="latency" title="Last response time">—</span>
+        <button id="stopBtn" class="btn danger sm" type="button" hidden>■ Stop</button>
+        <button id="clearBtn" class="btn ghost sm" type="button">Clear</button>
+      </div>
+    </header>
+    <div id="log" class="log" aria-live="polite" aria-label="Messages"></div>
+    <div id="chips" class="chips">
+      <button type="button" data-q="Explain NVIDIA NIM in 3 bullet points.">⚡ What is NIM?</button>
+      <button type="button" data-q="Give me 5 latency tips for LLM chat apps.">🚀 Latency tips</button>
+      <button type="button" data-q="Write a haiku about edge computing.">🌊 Haiku</button>
+      <button type="button" data-q="Summarize this chat template strategy in one sentence.">📝 Summarize</button>
+    </div>
+    <div id="status" class="status" role="status" hidden></div>
+    <form id="form" class="composer" autocomplete="off">
+      <div class="box">
+        <textarea id="input" rows="1" maxlength="4000" placeholder="Message NIM…  (Enter ↵ send · Shift+Enter newline · / focus · Esc stop)" aria-label="Message"></textarea>
+        <div class="box-bar"><span id="count" class="count">0 / 4000</span><span class="kbd">↵ send</span></div>
+      </div>
+      <button id="send" type="submit" aria-label="Send">➤</button>
+    </form>
+    <footer class="hint">Edge <code>/api/chat</code> · streams tokens · repeats cached · <span id="ctxHint">ctx 1024</span></footer>
+  </main>
+</div>
+<div id="toast" class="toast" role="alert" hidden></div>
+<noscript><p style="padding:1rem">JavaScript is required for streaming chat.</p></noscript>
+<script src="./assets/app.js" defer></script>
+</body>
+</html>

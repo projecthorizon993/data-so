@@ -1,0 +1,6 @@
+{
+  "apiEndpoint": "/api/chat",
+  "model": "",
+  "maxModelLen": 1024,
+  "comment": "Vercel: keep /api/chat (Edge fn). Pure-static hosts: point at your proxy URL."
+}

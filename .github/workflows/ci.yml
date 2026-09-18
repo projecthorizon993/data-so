@@ -1,0 +1,53 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  packages: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - name: Install deps & build
+        run: |
+          npm ci --ignore-scripts || npm install --ignore-scripts
+          npm run build
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with: { path: ./out }
+
+  deploy-pages:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+  nim-image:
+    needs: build
+    runs-on: ubuntu-latest
+    if: hashFiles('Dockerfile') != ''
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Build & push static web image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/chat-web:latest .
+          docker push ghcr.io/${{ github.repository }}/chat-web:latest

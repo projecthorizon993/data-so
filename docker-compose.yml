@@ -1,0 +1,36 @@
+services:
+  web:
+    build: .
+    ports: ["8080:80"]
+    depends_on: [proxy]
+  proxy:
+    image: node:22-alpine
+    working_dir: /app
+    volumes: [".:/app"]
+    command: ["node", "server.js"]
+    environment:
+      PORT: "3000"
+      NIM_API_URL: "http://nim:8000/v1/chat/completions"
+      NIM_MODEL: "${NIM_MODEL:-meta/llama-3.1-8b-instruct}"
+      NIM_MAX_MODEL_LEN: "${NIM_MAX_MODEL_LEN:-1024}"
+      NIM_API_KEY: "${NIM_API_KEY:-}"
+    ports: ["3000:3000"]
+    depends_on: [nim]
+  nim:
+    # PIN to your chosen NIM image, e.g.:
+    # image: nvcr.io/nim/meta/llama-3.1-8b-instruct:1.8.0
+    image: "${NIM_IMAGE:-nvcr.io/nim/meta/llama-3.1-8b-instruct:1.8.0}"
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices: [{ driver: nvidia, count: 1, capabilities: [gpu] }]
+    volumes:
+      - "${NIM_CACHE:-~/.cache/nim}:/opt/nim/.cache"
+      - "./chat.template.jinja:/opt/nim/chat.template.jinja:ro"
+    environment:
+      NGC_API_KEY: "${NGC_API_KEY:-$NIM_API_KEY}"
+      NIM_MODEL_PROFILE: "${NIM_MODEL_PROFILE:-}"
+      NIM_MAX_MODEL_LEN: "${NIM_MAX_MODEL_LEN:-1024}"
+      NIM_CHAT_TEMPLATE: "/opt/nim/chat.template.jinja"
+    ports: ["8000:8000"]

@@ -1,0 +1,9 @@
+node_modules/
+out/
+.env
+npm-debug.log
+.git/
+data-so/
+test/
+scripts/
+out/
