@@ -1,4 +1,4 @@
-{# NIM chat template — fixed short prefix keeps token count low (plan tip #1). #}
+{# Chat template — fixed short prefix keeps token count low (plan tip #1). #}
 {{- bos_token -}}
 {%- if messages[0]['role'] == 'system' -%}
 {{- 'System: ' + messages[0]['content'] + '\n' -}}
