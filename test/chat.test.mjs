@@ -27,28 +27,19 @@ test("frontend calls /api/chat with streaming + stop + cache", () => {
   assert.doesNotMatch(html, /promptInput/); // prompt editor removed
 });
 
-test("backends accept custom system prompt (capped)", () => {
-  const edge = fs.readFileSync(new URL("../api/chat.js", import.meta.url), "utf8");
+test("backend proxy accepts system prompt (capped, no secrets)", () => {
   const srv = fs.readFileSync(new URL("../server.js", import.meta.url), "utf8");
-  for (const s of [edge, srv]) {
-    assert.match(s, /body\.system/);
-    assert.match(s, /MAX_SYSTEM/);
-    assert.match(s, /DEFAULT_SYSTEM/);
-  }
+  assert.match(srv, /body\.system/);
+  assert.match(srv, /MAX_SYSTEM/);
+  assert.match(srv, /DEFAULT_SYSTEM/);
+  assert.match(srv, /v1\/chat\/completions/);
+  assert.match(srv, /x-cache/); // LRU cache header
+  assert.doesNotMatch(srv, /nvapi-/);
 });
 
-test("edge api fits Vercel free tier", () => {
-  const s = fs.readFileSync(new URL("../api/chat.js", import.meta.url), "utf8");
-  assert.match(s, /runtime.*edge/);
-  assert.match(s, /maxDuration/);
-  assert.match(s, /25_000/); // upstream cap under Hobby limit
-  assert.match(s, /max_tokens/);
-  assert.doesNotMatch(s, /node:/);
-});
-
-test("vercel.json is free-tier clean (no legacy builds/routes)", () => {
-  const v = JSON.parse(fs.readFileSync(new URL("../vercel.json", import.meta.url), "utf8"));
-  assert.ok(!v.builds && !v.routes, "avoid legacy builds/routes on Hobby");
-  assert.ok(v.functions?.["api/chat.js"]?.maxDuration <= 30);
-  assert.ok(Array.isArray(v.headers) && v.headers.length >= 3);
+test("no Vercel leftovers (Pages-only hosting)", () => {
+  assert.ok(!fs.existsSync(new URL("../vercel.json", import.meta.url)), "vercel.json removed");
+  assert.ok(!fs.existsSync(new URL("../api/chat.js", import.meta.url)), "Edge function removed");
+  const js = fs.readFileSync(new URL("../assets/app.js", import.meta.url), "utf8");
+  assert.doesNotMatch(js, /Vercel URL/);
 });

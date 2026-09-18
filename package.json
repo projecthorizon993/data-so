@@ -7,7 +7,6 @@
     "start": "node server.js",
     "dev": "PORT=3000 node server.js",
     "build": "node scripts/build.mjs",
-    "vercel-build": "node scripts/build.mjs",
     "test": "node --test test/*.test.mjs"
   },
   "engines": { "node": ">=20" }

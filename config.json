@@ -4,5 +4,5 @@
   "maxModelLen": 1024,
   "sheetsEndpoint": "",
   "idSalt": "change-me-before-pilot",
-  "comment": "sheetsEndpoint: Apps Script web-app /exec URL from sheets/Code.gs (empty = export disabled)."
+  "comment": "GitHub Pages: set apiEndpoint to your backend/proxy URL (e.g. https://your-host:3000/api/chat). Same-origin /api/chat works when server.js serves the site."
 }

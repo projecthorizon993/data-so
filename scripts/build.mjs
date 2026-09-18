@@ -16,13 +16,13 @@ for (const d of ["assets","api","sheets"]) {
   fs.mkdirSync(path.join(out, d), { recursive: true });
   for (const f of fs.readdirSync(src)) fs.copyFileSync(path.join(src, f), path.join(out, d, f));
 }
-// validate chat template JSON + vercel free-tier config + item bank
+// validate chat template JSON + item bank + backend proxy
 JSON.parse(fs.readFileSync(path.join(root, "chat.template.json"), "utf8"));
-JSON.parse(fs.readFileSync(path.join(root, "vercel.json"), "utf8"));
 const bank = JSON.parse(fs.readFileSync(path.join(root, "items.json"), "utf8"));
 if (!Array.isArray(bank.items) || bank.items.length < 10) throw new Error("items.json must contain item bank");
-const api = fs.readFileSync(path.join(root, "api/chat.js"), "utf8");
-if (!api.includes('runtime = "edge"')) throw new Error("api/chat.js must use edge runtime for Hobby");
+const srv = fs.readFileSync(path.join(root, "server.js"), "utf8");
+if (!srv.includes("v1/chat/completions")) throw new Error("server.js must proxy NIM completions endpoint");
+if (!srv.includes("resolveSystem")) throw new Error("server.js must resolve the fixed system prompt");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 if (!html.includes("/api/chat")) throw new Error("index.html must reference /api/chat");
 const js = fs.readFileSync(path.join(root, "assets/app.js"), "utf8");

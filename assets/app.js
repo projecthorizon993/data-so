@@ -179,7 +179,7 @@ async function ask(prompt) {
       let d = ""; try { d = JSON.stringify(await res.json()).slice(0, 200); } catch {}
       if (res.status === 500) throw new Error("Server misconfigured (NIM_API_URL?)");
       if ((res.status === 404 || res.status === 405) && CFG.api.startsWith("/"))
-        throw new Error(`HTTP ${res.status} — no API at ${CFG.api}. This page is on a static-only host (GitHub Pages can't run backends). Open the Vercel URL, or point apiEndpoint at one via config.json.`);
+        throw new Error(`HTTP ${res.status} — no API at ${CFG.api}. This page is on a static-only host (GitHub Pages can't run backends). Point apiEndpoint at your backend URL via config.json.`);
       throw new Error(`HTTP ${res.status} ${d}`);
     }
     const reader = res.body.getReader(), dec = new TextDecoder();

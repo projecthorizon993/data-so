@@ -1,0 +1,12 @@
+{
+  "name": "AURA chat proxy",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": { "label": "AURA chat + /api/chat", "visibility": "public", "onAutoForward": "notify" }
+  },
+  "postCreateCommand": "npm test",
+  "customizations": {
+    "vscode": { "extensions": [] }
+  }
+}
