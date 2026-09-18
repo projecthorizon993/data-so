@@ -12,6 +12,15 @@ const NIM_KEY = process.env.NIM_API_KEY || "";
 const NIM_MODEL = process.env.NIM_MODEL || "meta/llama-3.1-8b-instruct";
 const MAX_LEN = Number(process.env.NIM_MAX_MODEL_LEN || 1024);
 const CACHE_TTL = 10 * 60 * 1000;
+const DEFAULT_SYSTEM = "You are a concise, helpful assistant. Answer in 150 words or fewer unless asked for more.";
+const MAX_SYSTEM = 1500; // free-tier guard: custom prompts capped
+// Resolve system prompt: explicit `system` field wins, then in-messages system, then default.
+function resolveSystem(body, messages) {
+  const explicit = typeof body.system === "string" ? body.system.trim().slice(0, MAX_SYSTEM) : "";
+  const embedded = messages.find(m => m.role === "system")?.content || "";
+  const system = (explicit || String(embedded).slice(0, MAX_SYSTEM) || DEFAULT_SYSTEM).slice(0, MAX_SYSTEM);
+  return [{ role: "system", content: system }, ...messages.filter(m => m.role !== "system")];
+}
 
 const cache = new Map(); // key -> { t, body }
 const hits = new Map();  // ip -> [timestamps]
@@ -46,7 +55,7 @@ const server = http.createServer(async (req, res) => {
   if (req.method === "OPTIONS") return res.writeHead(204).end();
   if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html")) return serve(res, "index.html");
   if (req.method === "GET" && url.pathname.startsWith("/assets/")) return serve(res, url.pathname.slice(1));
-  if (req.method === "GET" && ["/config.json","/chat.template.json","/manifest.webmanifest","/sw.js","/robots.txt"].includes(url.pathname)) return serve(res, url.pathname.slice(1));
+  if (req.method === "GET" && ["/config.json","/chat.template.json","/items.json","/manifest.webmanifest","/sw.js","/robots.txt"].includes(url.pathname)) return serve(res, url.pathname.slice(1));
   if (req.method === "GET" && url.pathname === "/healthz") { res.writeHead(200,{"content-type":"application/json"}); return res.end('{"ok":true}'); }
 
   if (url.pathname !== "/api/chat" || req.method !== "POST") { res.writeHead(404).end("not found"); return; }
@@ -57,8 +66,10 @@ const server = http.createServer(async (req, res) => {
   for await (const c of req) { raw += c; if (raw.length > 64_000) break; }
   let body;
   try { body = JSON.parse(raw || "{}"); } catch { res.writeHead(400).end('{"error":"bad_json"}'); return; }
-  const messages = Array.isArray(body.messages) ? body.messages.slice(-21).map(m=>({role:String(m.role).slice(0,16), content:String(m.content).slice(0,8000)})) : [];
-  if (!messages.length) { res.writeHead(400).end('{"error":"no_messages"}'); return; }
+  const incoming = Array.isArray(body.messages) ? body.messages.slice(-21).map(m=>({role:String(m.role).slice(0,16), content:String(m.content).slice(0,8000)})) : [];
+  const messages = resolveSystem(body, incoming);
+  const turns = messages.filter(m => m.role !== "system");
+  if (!turns.length) { res.writeHead(400).end('{"error":"no_messages"}'); return; }
   const model = String(body.model || NIM_MODEL);
   const stream = body.stream !== false;
   const ck = keyOf(messages, model, stream);

@@ -13,8 +13,20 @@ test("frontend calls /api/chat with streaming + stop + cache", () => {
   assert.match(js, /text\/event-stream/);
   assert.match(js, /AbortController/);
   assert.match(js, /localStorage/);
+  assert.match(js, /system: sys/); // custom prompt rides in `system` field
   assert.match(html, /\/api\/chat/);
   assert.match(html, /data-theme/);
+  assert.match(html, /promptInput/);
+});
+
+test("backends accept custom system prompt (capped)", () => {
+  const edge = fs.readFileSync(new URL("../api/chat.js", import.meta.url), "utf8");
+  const srv = fs.readFileSync(new URL("../server.js", import.meta.url), "utf8");
+  for (const s of [edge, srv]) {
+    assert.match(s, /body\.system/);
+    assert.match(s, /MAX_SYSTEM/);
+    assert.match(s, /DEFAULT_SYSTEM/);
+  }
 });
 
 test("edge api fits Vercel free tier", () => {

@@ -19,6 +19,9 @@ const cors = {
 const enc = new TextEncoder();
 const sse = (obj) => enc.encode(`data: ${JSON.stringify(obj)}\n\n`);
 
+const DEFAULT_SYSTEM = "You are a concise, helpful assistant. Answer in 150 words or fewer unless asked for more.";
+const MAX_SYSTEM = 1500; // free-tier guard: custom prompts capped
+
 export default async function handler(req) {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if (req.method !== "POST") {
@@ -43,16 +46,22 @@ export default async function handler(req) {
   }
 
   // ---- strict validation: keeps Hobby bandwidth + GPU cost down ----
+  // Custom prompt support: explicit `system` field wins, then embedded
+  // system message, then default. Always exactly one system message upstream.
+  const sysRaw = typeof body.system === "string" ? body.system.trim().slice(0, MAX_SYSTEM) : "";
   const raw = Array.isArray(body.messages) ? body.messages.slice(-13) : [];
-  if (!raw.length) return Response.json({ error: "no_messages" }, { status: 400, headers: cors });
-  const messages = [];
+  const turns = [];
+  let embeddedSys = "";
   for (const m of raw) {
     const role = m?.role === "assistant" ? "assistant" : m?.role === "system" ? "system" : "user";
     const content = String(m?.content ?? "").slice(0, 4000);
     if (!content.trim()) continue;
-    messages.push({ role, content });
+    if (role === "system") { if (!embeddedSys) embeddedSys = content.slice(0, MAX_SYSTEM); continue; }
+    turns.push({ role, content });
   }
-  if (!messages.length) return Response.json({ error: "empty_messages" }, { status: 400, headers: cors });
+  if (!turns.length) return Response.json({ error: "no_messages" }, { status: 400, headers: cors });
+  const system = (sysRaw || embeddedSys || DEFAULT_SYSTEM).slice(0, MAX_SYSTEM);
+  const messages = [{ role: "system", content: system }, ...turns];
 
   const model = String(body.model || NIM_MODEL).slice(0, 120);
   const stream = body.stream !== false;

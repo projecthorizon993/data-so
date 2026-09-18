@@ -26,6 +26,20 @@
       <button id="newChat" class="btn primary sm" type="button" title="New chat (N)">+ New</button>
     </div>
     <div id="chatList" class="chat-list" role="listbox" aria-label="Saved chats"></div>
+    <details id="promptBox" class="prompt-box">
+      <summary>✎ System prompt <span id="promptState" class="pill sm">default</span></summary>
+      <div class="preset-row">
+        <button type="button" data-preset="default">Default</button>
+        <button type="button" data-preset="coder">Coder</button>
+        <button type="button" data-preset="tutor">Tutor</button>
+      </div>
+      <textarea id="promptInput" rows="4" maxlength="1500" placeholder="Custom system prompt — paste agent output here…" aria-label="Custom system prompt"></textarea>
+      <div class="preset-row">
+        <button id="promptSave" class="btn primary sm" type="button">Save</button>
+        <button id="promptReset" class="btn ghost sm" type="button">Reset</button>
+      </div>
+      <small>Saved on device · sent as <code>system</code> · max 1500 chars</small>
+    </details>
     <div class="side-foot">
       <div class="pill" id="modelPill" title="Backend model">● nim · 8b</div>
       <button id="themeBtn" class="btn ghost sm" type="button" title="Toggle theme">◐ Theme</button>

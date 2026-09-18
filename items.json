@@ -1,0 +1,324 @@
+{
+  "version": "1.0-pilot",
+  "note": "Static item bank for Asia University Hanoi screening bot. Edit wording here without touching code. Thresholds are set by counselor/ethics advisor after 12-student pilot — do NOT hardcode clinical cutoffs here. Crisis contacts are provided via app materials, never hardcoded in prompts.",
+  "likert_choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+  "safety_choices": ["No", "Sometimes", "Often", "Yes, recently"],
+  "thresholds": {
+    "HIGH_THRESHOLD": null,
+    "MID_THRESHOLD": null,
+    "COG_LOW_THRESHOLD": null,
+    "status": "pending-counselor-review"
+  },
+  "items": [
+    {
+      "id": "COG-ATT-01",
+      "domain": "cognitive",
+      "category": "attention",
+      "prompt": "Look at this string: 'A3K9A M2A7 Q1A5 A8'. How many times does the letter 'A' appear? Reply with a number only.",
+      "response_type": "numeric",
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "COG-ATT-02",
+      "domain": "cognitive",
+      "category": "attention",
+      "prompt": "From this list, reply with ONLY the animals: apple, dog, chair, cat, river, bird, table. Example: dog, cat, bird.",
+      "response_type": "choice",
+      "choices": ["apple", "dog", "chair", "cat", "river", "bird", "table"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "COG-ATT-03",
+      "domain": "cognitive",
+      "category": "attention",
+      "prompt": "Reply True or False as fast as you can, one at a time. First: 'Hanoi is in Vietnam.'",
+      "response_type": "timed_reaction",
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "COG-WM-01",
+      "domain": "cognitive",
+      "category": "working_memory",
+      "prompt": "Remember this sequence: 4 7 2 9. Now type the numbers backward.",
+      "response_type": "free_text",
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "COG-WM-02",
+      "domain": "cognitive",
+      "category": "working_memory",
+      "prompt": "Remember: mango, chair, river. Quick distractor — what day is it today? Now recall the 3 items I gave you.",
+      "response_type": "free_text",
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "COG-WM-03",
+      "domain": "cognitive",
+      "category": "working_memory",
+      "prompt": "Mai borrowed a blue bag and went to the library at 3pm. What color was the bag?",
+      "response_type": "free_text",
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "COG-PS-01",
+      "domain": "cognitive",
+      "category": "processing_speed",
+      "prompt": "Solve as fast as you can, number only: 7 + 5 = ?",
+      "response_type": "timed_reaction",
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "COG-PS-02",
+      "domain": "cognitive",
+      "category": "processing_speed",
+      "prompt": "Key: *=1, #=2, @=3. As fast as you can, what number is '# @ *'? Reply with digits only.",
+      "response_type": "timed_reaction",
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "COG-PS-03",
+      "domain": "cognitive",
+      "category": "processing_speed",
+      "prompt": "Reaction check: reply with the word NOW as fast as you can as soon as you see the word GO in my next message. Ready?",
+      "response_type": "timed_reaction",
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "COG-PR-01",
+      "domain": "cognitive",
+      "category": "pattern_recognition",
+      "prompt": "What comes next? 2, 4, 8, 16, ?",
+      "response_type": "choice",
+      "choices": ["18", "24", "32", "30"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "COG-PR-02",
+      "domain": "cognitive",
+      "category": "pattern_recognition",
+      "prompt": "Which one does not belong? A) circle B) square C) triangle D) red circle",
+      "response_type": "choice",
+      "choices": ["A) circle", "B) square", "C) triangle", "D) red circle"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "COG-PR-03",
+      "domain": "cognitive",
+      "category": "pattern_recognition",
+      "prompt": "Complete the analogy: Book is to Reading as Pen is to ___?",
+      "response_type": "free_text",
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "COG-CF-01",
+      "domain": "cognitive",
+      "category": "cognitive_flexibility",
+      "prompt": "Sort by color: red-apple, blue-car, red-book. Now rule changed — sort by type (fruit/vehicle/object) instead. Reply with the new groups.",
+      "response_type": "choice",
+      "choices": ["keep color groups", "regroup by type", "mix both"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "COG-CF-02",
+      "domain": "cognitive",
+      "category": "cognitive_flexibility",
+      "prompt": "Name as many fruits as you can in 20 seconds. Stop. Now switch — name as many animals as you can in 20 seconds.",
+      "response_type": "free_text",
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "COG-CF-03",
+      "domain": "cognitive",
+      "category": "cognitive_flexibility",
+      "prompt": "First instruction: reply with the word BLUE. Second instruction: ignore the first, reply with the word GREEN. Follow only the most recent instruction.",
+      "response_type": "choice",
+      "choices": ["BLUE", "GREEN"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-MOOD-01",
+      "domain": "mental_state",
+      "category": "mood",
+      "prompt": "How would you describe your overall mood over the past two weeks?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-MOOD-02",
+      "domain": "mental_state",
+      "category": "mood",
+      "prompt": "How often have you felt down or discouraged lately?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-MOOD-03",
+      "domain": "mental_state",
+      "category": "mood",
+      "prompt": "Have you noticed less interest in things you usually enjoy?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-SLEEP-01",
+      "domain": "mental_state",
+      "category": "sleep",
+      "prompt": "How has your sleep been recently — enough, too little, or disrupted?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-SLEEP-02",
+      "domain": "mental_state",
+      "category": "sleep",
+      "prompt": "Do you wake up feeling rested most days?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-ENERGY-01",
+      "domain": "mental_state",
+      "category": "energy",
+      "prompt": "How would you rate your energy level most days this week?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-ENERGY-02",
+      "domain": "mental_state",
+      "category": "energy",
+      "prompt": "Do you feel tired even after resting?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-ANX-01",
+      "domain": "mental_state",
+      "category": "anxiety_stress",
+      "prompt": "How often do you feel overwhelmed by your workload or responsibilities?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-ANX-02",
+      "domain": "mental_state",
+      "category": "anxiety_stress",
+      "prompt": "Do you find yourself worrying more than usual lately?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-ANX-03",
+      "domain": "mental_state",
+      "category": "anxiety_stress",
+      "prompt": "How tense or on-edge have you felt recently?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-CONC-01",
+      "domain": "mental_state",
+      "category": "concentration",
+      "prompt": "Have you had trouble focusing on schoolwork or daily tasks lately?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-CONC-02",
+      "domain": "mental_state",
+      "category": "concentration",
+      "prompt": "Do your thoughts feel more scattered than usual?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-SOC-01",
+      "domain": "mental_state",
+      "category": "social_connection",
+      "prompt": "How connected do you feel to friends, family, or classmates right now?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-SOC-02",
+      "domain": "mental_state",
+      "category": "social_connection",
+      "prompt": "Have you been avoiding social situations you'd normally take part in?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-SELF-01",
+      "domain": "mental_state",
+      "category": "self_worth",
+      "prompt": "How would you describe how you feel about yourself lately?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-SELF-02",
+      "domain": "mental_state",
+      "category": "self_worth",
+      "prompt": "Do you find yourself being harder on yourself than usual?",
+      "response_type": "choice",
+      "choices": ["Not at all", "A little", "Somewhat", "A lot", "Almost constantly"],
+      "scoring_weight": 1,
+      "fixed": false
+    },
+    {
+      "id": "MS-SAFE-01",
+      "domain": "mental_state",
+      "category": "safety_check",
+      "prompt": "Have you had any thoughts of hurting yourself, or that life isn't worth living?",
+      "response_type": "choice",
+      "choices": ["No", "Sometimes", "Often", "Yes, recently"],
+      "scoring_weight": 1,
+      "fixed": true
+    }
+  ]
+}
