@@ -111,6 +111,8 @@ function renderList() {
 renderList(); paint();
 
 log.addEventListener("click", (e) => {
+  const rt = e.target.closest("[data-retry]");
+  if (rt && window.__lastPrompt) { ask(window.__lastPrompt); return; }
   const b = e.target.closest("[data-copy]");
   if (!b) return;
   navigator.clipboard?.writeText(b.getAttribute("data-copy") || "").then(() => say("Copied ✓")).catch(() => {});
@@ -128,6 +130,63 @@ function tagAssistantReply(text) {
       lastAssistant = { item_id: window.AuraScore.matchItemId(text, BANK), ts: Date.now() };
     else lastAssistant = { item_id: null, ts: Date.now() };
   } catch { lastAssistant = { item_id: null, ts: Date.now() }; }
+}
+
+/* ---------- screening session runner (Block D) ----------
+   Pins the model to exact bank items: each user turn carries the current
+   item verbatim in a protocol note (payload only — records keep raw text).
+   Flow state lives here, so the model can't silently restart the session. */
+let session = null; // {ids, idx, done}
+try {
+  session = JSON.parse(localStorage.getItem("aura-session") || "null");
+  // auto-recover corrupt state instead of jamming the flow
+  if (session && (!Array.isArray(session.ids) || !Number.isInteger(session.idx) || session.idx < 0)) session = null;
+} catch { session = null; }
+const saveSession = () => { try { localStorage.setItem("aura-session", JSON.stringify(session)); } catch {} };
+function resetSession(silent) {
+  session = null;
+  try { localStorage.removeItem("aura-session"); } catch {}
+  paintSess();
+  if (!silent) say("Session cleared — tap ▶ Start screening for a fresh run");
+}
+function startSession() {
+  let prev = [];
+  try { prev = JSON.parse(localStorage.getItem("aura-prev-ids") || "[]"); } catch {}
+  const ids = (window.AuraScore && BANK.items.length) ? window.AuraScore.buildSession(BANK, prev) : [];
+  session = { ids, idx: 0, done: !ids.length };
+  saveSession(); paintSess();
+  say(ids.length ? `Screening started · ${ids.length} items, one at a time` : "Screening started");
+}
+function currentItem() {
+  if (!session || session.done || !BANK.items.length) return null;
+  if (!Array.isArray(session.ids) || session.idx >= session.ids.length) { resetSession(true); return null; }
+  return BANK.items.find(i => i.id === session.ids[session.idx]) || null;
+}
+function advanceSession() {
+  if (!session || session.done) return;
+  session.idx++;
+  if (session.idx >= session.ids.length) {
+    session.done = true;
+    try { localStorage.setItem("aura-prev-ids", JSON.stringify(session.ids)); } catch {}
+    say("Session complete — tap ⬆ Export to send scores ✓");
+  }
+  saveSession(); paintSess();
+}
+function paintSess() {
+  const b = $("#sessBadge");
+  if (!b) return;
+  if (session && !session.done && session.ids.length) {
+    b.hidden = false;
+    b.textContent = `item ${Math.min(session.idx + 1, session.ids.length)}/${session.ids.length}`;
+  } else if (session && session.done) { b.hidden = false; b.textContent = "done ✓"; }
+  else b.hidden = true;
+}
+// Link the just-scored user reply to the exact presented item (beats fuzzy match).
+function linkSession(item) {
+  if (!session || session.done || !item) return;
+  const r = records[records.length - 1];
+  if (r) { r.item_id = item.id; saveRecords(); }
+  advanceSession();
 }
 
 /* ---------- free-tier token budget: 6 turns, ~75% input / 512 out ---------- */
@@ -154,12 +213,18 @@ async function ask(prompt) {
   if (hit) {
     c.msgs.push({ role: "assistant", content: hit, cached: true, ms: 0 });
     tagAssistantReply(hit);
+    linkSession(session && !session.done ? currentItem() : null);
     if (c.title === "New conversation") c.title = prompt.slice(0, 42);
     persist(); renderList(); paint(); latencyEl.textContent = "cached"; return;
   }
   ctrl?.abort(); ctrl = new AbortController();
   const killer = setTimeout(() => ctrl.abort("timeout"), 25_000);
-  const messages = budget([...c.msgs.slice(-12), { role: "user", content: prompt }], SYSTEM);
+  const item = session && !session.done ? currentItem() : null;
+  let userContent = prompt;
+  if (item) {
+    userContent = prompt + `\n\n[Protocol: present this exact screening item now, word-for-word, with nothing added before it except at most one short transition sentence. ITEM: "${item.prompt}"]`;
+  }
+  const messages = budget([...c.msgs.slice(-12), { role: "user", content: userContent }], SYSTEM);
   // Free-tier guard: small completion cap. Fixed prompt rides in `system`.
   const payload = JSON.stringify({ messages, system: SYSTEM, model: CFG.model || undefined, stream: true, max_tokens: 256 });
   const t0 = performance.now();
@@ -201,6 +266,24 @@ async function ask(prompt) {
       }
     }
     if (raf) cancelAnimationFrame(raf);
+    if (!acc.trim()) {
+      // Empty reply (model hiccup) — one non-streaming retry before giving up.
+      try {
+        const r2 = await fetch(CFG.api, {
+          method: "POST", signal: ctrl.signal,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ messages, system: SYSTEM, stream: false, max_tokens: 256 }),
+        });
+        acc = (await r2.json())?.choices?.[0]?.message?.content || "";
+      } catch {}
+    }
+    if (!acc.trim()) {
+      el.classList.remove("streaming");
+      el.innerHTML = `<em>Empty reply — the model returned nothing.</em><div class="meta"><button data-retry type="button">↻ retry</button></div>`;
+      window.__lastPrompt = prompt;
+      say("Empty reply — retry?");
+      return "";
+    }
     el.classList.remove("streaming");
     el.innerHTML = md(acc) || "<em>(empty reply)</em>";
     const ms = Math.round(performance.now() - t0);
@@ -209,6 +292,7 @@ async function ask(prompt) {
     cache.set(key, acc);
     c.msgs.push({ role: "assistant", content: acc, ms });
     tagAssistantReply(acc);
+    linkSession(item);
     if (c.title === "New conversation") c.title = prompt.slice(0, 42);
     persist(); renderList();
     log.scrollTop = log.scrollHeight;
@@ -270,6 +354,7 @@ clearBtn.onclick = () => { const c = getCur(); if (c) { c.msgs = []; c.title = "
 newBtn.onclick = () => { newChat(); document.body.classList.remove("nav-open"); };
 chips.addEventListener("click", (e) => {
   const b = e.target.closest("[data-q]"); if (!b) return;
+  if (b.hasAttribute("data-session")) { resetSession(true); startSession(); }
   input.value = b.dataset.q; input.focus(); form.requestSubmit();
 });
 themeBtn.onclick = () => {
@@ -279,4 +364,6 @@ themeBtn.onclick = () => {
 };
 menuBtn.onclick = () => document.body.classList.toggle("nav-open");
 scrim.onclick = () => document.body.classList.remove("nav-open");
+$("#sessResetBtn")?.addEventListener("click", () => resetSession(false));
+paintSess();
 })();

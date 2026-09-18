@@ -73,3 +73,13 @@ test("export payload shape (Block G)", () => {
   assert.ok(Array.isArray(p.selected_item_ids) && Array.isArray(p.responses));
   assert.ok(p.timestamp);
 });
+
+test("buildSession follows Block D", () => {
+  const ids = S.buildSession(bank, []);
+  const byId = Object.fromEntries(bank.items.map(i => [i.id, i]));
+  const cog = ids.filter(id => ["attention", "working_memory", "processing_speed", "pattern_recognition", "cognitive_flexibility"].includes(byId[id]?.category));
+  assert.equal(cog.length, 10); // 2 per cognitive category
+  assert.equal(ids.filter(id => id === "MS-SAFE-01").length, 1); // safety exactly once
+  assert.ok(ids.indexOf("MS-SAFE-01") > 0 && ids.indexOf("MS-SAFE-01") < ids.length - 1); // mid-block
+  assert.ok(ids.length >= 10 + 14 + 1); // 10 cog + >=14 mental (2x7) + safety
+});

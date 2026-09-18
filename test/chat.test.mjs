@@ -27,6 +27,17 @@ test("frontend calls /api/chat with streaming + stop + cache", () => {
   assert.doesNotMatch(html, /promptInput/); // prompt editor removed
 });
 
+test("session runner + reset wiring present", () => {
+  const js = fs.readFileSync(new URL("../assets/app.js", import.meta.url), "utf8");
+  const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  assert.match(js, /startSession/);
+  assert.match(js, /resetSession/);
+  assert.match(js, /data-retry/);
+  assert.match(html, /sessResetBtn/);
+  assert.match(html, /sessBadge/);
+  assert.match(html, /data-session/);
+});
+
 test("backend proxy accepts system prompt (capped, no secrets)", () => {
   const srv = fs.readFileSync(new URL("../server.js", import.meta.url), "utf8");
   assert.match(srv, /body\.system/);

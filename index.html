@@ -35,17 +35,18 @@
   <main class="main">
     <header class="topbar">
       <button id="menuBtn" class="icon-btn" type="button" aria-label="Menu">☰</button>
-      <div class="title"><span class="live" id="liveDot"></span><span id="convTitle">New conversation</span></div>
+      <div class="title"><span class="live" id="liveDot"></span><span id="convTitle">New conversation</span><span id="sessBadge" class="pill sm" hidden></span></div>
       <div class="top-actions">
         <span id="latency" class="latency" title="Last response time">—</span>
         <button id="stopBtn" class="btn danger sm" type="button" hidden>■ Stop</button>
         <button id="exportBtn" class="btn ghost sm" type="button" title="Score session + send to spreadsheet">⬆ Export</button>
+        <button id="sessResetBtn" class="btn ghost sm" type="button" title="End screening session and start fresh">↺ Session</button>
         <button id="clearBtn" class="btn ghost sm" type="button">Clear</button>
       </div>
     </header>
     <div id="log" class="log" aria-live="polite" aria-label="Messages"></div>
     <div id="chips" class="chips">
-      <button type="button" data-q="Hi! I'd like to start the screening.">▶ Start screening</button>
+      <button type="button" data-q="Hi! I'd like to start the screening." data-session="1">▶ Start screening</button>
       <button type="button" data-q="What does this screening involve?">❓ What is this?</button>
       <button type="button" data-q="How is my data handled in this screening?">🔒 My data</button>
       <button type="button" data-q="I'm feeling stressed about school lately.">💬 I'm stressed</button>

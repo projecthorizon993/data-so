@@ -159,6 +159,52 @@ function scoreSession(records, bank, thresholds) {
   return { category_scores, composites, tier, flags, safetyAnswer };
 }
 
-const api = { ANSWER_KEY, CRISIS_WORDS, parseValue, matchItemId, scoreSession };
+/* ---------- Block D: buildSession(bank, prevIds) ----------
+   10 cognitive (2 per category) + 2-3 per mental category (rotating 7) +
+   MS-SAFE-01 exactly once mid-block; jaccard reshuffle vs prev; interleaved. */
+const COG_CATS = ["attention", "working_memory", "processing_speed", "pattern_recognition", "cognitive_flexibility"];
+const MENTAL_CATS = ["mood", "sleep", "energy", "anxiety_stress", "concentration", "social_connection", "self_worth"];
+
+function sample(pool, n) {
+  const a = pool.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a.slice(0, Math.min(n, a.length));
+}
+function jaccard(a, b) {
+  const A = new Set(a), B = new Set(b);
+  if (!A.size && !B.size) return 0;
+  let inter = 0;
+  for (const x of A) if (B.has(x)) inter++;
+  return inter / (A.size + B.size - inter);
+}
+function buildSession(bank, prevIds) {
+  prevIds = prevIds || [];
+  const items = bank.items || [];
+  const byCat = {};
+  for (const it of items) (byCat[it.category] || (byCat[it.category] = [])).push(it);
+  let attempt = [];
+  for (let r = 0; r < 4; r++) {
+    const cog = [];
+    for (const c of COG_CATS) cog.push(...sample(byCat[c] || [], 2).map(i => i.id));
+    const mental = [];
+    for (const c of MENTAL_CATS) {
+      const n = 2 + Math.floor(Math.random() * 2); // 2-3
+      mental.push(...sample(byCat[c] || [], n).map(i => i.id));
+    }
+    // interleave cognitive + mental so phase is hidden; safety mid-block
+    const mixed = [];
+    const A = sample(cog, cog.length), B = sample(mental, mental.length);
+    while (A.length || B.length) {
+      if (A.length) mixed.push(A.shift());
+      if (B.length) mixed.push(B.shift());
+    }
+    const mid = Math.floor(mixed.length / 2);
+    attempt = [...mixed.slice(0, mid), "MS-SAFE-01", ...mixed.slice(mid)];
+    if (jaccard(attempt, prevIds) <= 0.7) break;
+  }
+  return attempt;
+}
+
+const api = { ANSWER_KEY, CRISIS_WORDS, parseValue, matchItemId, scoreSession, buildSession };
 if (typeof window !== "undefined") window.AuraScore = api;
 })();
