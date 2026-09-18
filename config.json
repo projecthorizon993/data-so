@@ -1,5 +1,5 @@
 {
-  "apiEndpoint": "/api/chat",
+  "apiEndpoint": "https://data-so.lequangglobal.workers.dev/api/chat",
   "model": "",
   "maxModelLen": 1024,
   "sheetsEndpoint": "",
