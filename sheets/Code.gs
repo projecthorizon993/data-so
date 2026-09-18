@@ -10,7 +10,7 @@ function doPost(e) {
     sheet = ss.insertSheet('results');
     sheet.appendRow(['timestamp', 'session_id', 'student_hash', 'bank_version',
       'selected_item_ids', 'responses', 'last_item_id', 'last_value', 'last_parsed',
-      'category_scores', 'composites', 'risk_tier', 'flags']);
+      'category_scores', 'composites', 'risk_tier', 'tier_escalated_by_ai', 'ai_review', 'flags']);
   }
   const d = JSON.parse(e.postData.contents);
   sheet.appendRow([
@@ -26,6 +26,8 @@ function doPost(e) {
     JSON.stringify(d.category_scores || {}),
     JSON.stringify(d.composites || {}),
     d.risk_tier || '',
+    d.tier_escalated_by_ai ? 'YES' : '',
+    JSON.stringify(d.ai_review || null),
     JSON.stringify(d.flags || [])
   ]);
   return ContentService.createTextOutput(JSON.stringify({ ok: true }))

@@ -10,7 +10,7 @@ const log = $("#log"), form = $("#form"), input = $("#input"), sendBtn = $("#sen
   scrim = $("#scrim"), modelPill = $("#modelPill"), ctxHint = $("#ctxHint");
 
 const boot = JSON.parse(document.getElementById("boot-config")?.textContent || "{}");
-const CFG = { api: boot.apiEndpoint || "/api/chat", stream: true, cacheSize: 60, maxLen: 1024, model: "", sheetsEndpoint: "", idSalt: "change-me-before-pilot" };
+const CFG = { api: boot.apiEndpoint || "/api/chat", stream: true, cacheSize: 60, maxLen: 1024, model: "", reviewModel: "deepseek-ai/deepseek-v4-flash-0731", sheetsEndpoint: "", idSalt: "change-me-before-pilot" };
 let BANK = { version: "unknown", items: [], thresholds: {} };
 fetch("./config.json", { cache: "force-cache" }).then(r => r.ok ? r.json() : null).then(j => {
   if (!j) return;
@@ -19,6 +19,7 @@ fetch("./config.json", { cache: "force-cache" }).then(r => r.ok ? r.json() : nul
   if (j.maxModelLen) { CFG.maxLen = j.maxModelLen; ctxHint.textContent = "ctx " + j.maxModelLen; }
   if (j.sheetsEndpoint) CFG.sheetsEndpoint = j.sheetsEndpoint;
   if (j.idSalt) CFG.idSalt = j.idSalt;
+  if (j.reviewModel) CFG.reviewModel = j.reviewModel;
 }).catch(() => {});
 fetch("./items.json", { cache: "force-cache" }).then(r => r.ok ? r.json() : null)
   .then(j => { if (j && Array.isArray(j.items)) BANK = j; }).catch(() => {});
@@ -363,7 +364,31 @@ $("#exportBtn")?.addEventListener("click", async () => {
       try { parsed = it && window.AuraScore ? window.AuraScore.parseValue(it, r.user_text) : null; } catch {}
       return { ...r, parsed };
     });
-    const result = window.AuraScore.scoreSession(records, BANK, BANK.thresholds || {});
+    const det = window.AuraScore.scoreSession(records, BANK, BANK.thresholds || {});
+    // AI review (slow smart model, non-blocking on failure): may escalate tier only.
+    let review = null;
+    try {
+      say("AI review… (slow model, up to ~60s)");
+      const c0 = getCur();
+      const transcript = (c0?.msgs || []).map(m => `${m.role}: ${m.content}`).join("\n").slice(-6000);
+      const rctl = new AbortController();
+      const rkiller = setTimeout(() => rctl.abort(), 90_000);
+      const rr = await fetch(CFG.api, {
+        method: "POST", signal: rctl.signal,
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          system: window.AuraScore.REVIEW_SYSTEM,
+          messages: [{ role: "user", content: window.AuraScore.buildReviewPrompt(transcript) }],
+          model: CFG.reviewModel, stream: false, max_tokens: 400
+        })
+      });
+      clearTimeout(rkiller);
+      const rj = await rr.json().catch(() => ({}));
+      review = window.AuraScore.parseReview(rj.choices?.[0]?.message?.content || "");
+      if (!review) say("AI review unparseable — using code score");
+    } catch { review = null; say("AI review failed — using code score"); }
+    const merged = window.AuraScore.mergeTier(det.tier, review);
+    const result = { ...det, tier: merged.tier, escalated: merged.escalated, review };
     const studentHash = await window.AuraExport.hashId(sid, CFG.idSalt);
     const sessionId = "s" + Date.now().toString(36);
     const payload = window.AuraExport.buildPayload({ sessionId, studentHash, bank: BANK, records: enriched, result });

@@ -79,6 +79,20 @@ test("export payload shape (Block G)", () => {
   assert.equal(JSON.stringify(p.responses[0].parsed), JSON.stringify({ value: 2, max: 4 }));
 });
 
+test("AI review: parse + escalate-only merge", () => {
+  const good = S.parseReview('text {"summary": "ok", "concerns": ["sleep"], "red_flags": [], "suggested_tier": "elevated", "confidence": "high"} tail');
+  assert.equal(good.suggested_tier, "elevated");
+  assert.equal(good.confidence, "high");
+  assert.equal(S.parseReview("no json here"), null);
+  assert.equal(S.parseReview('{"suggested_tier": "bogus"}'), null);
+  const jeq = (a, b) => assert.equal(JSON.stringify(a), JSON.stringify(b)); // vm-realm safe
+  jeq(S.mergeTier("low", good), { tier: "low", escalated: false });
+  jeq(S.mergeTier("low", { ...good, suggested_tier: "crisis" }), { tier: "crisis", escalated: true });
+  jeq(S.mergeTier("elevated", { ...good, suggested_tier: "low" }), { tier: "elevated", escalated: false }); // never de-escalates
+  jeq(S.mergeTier("low", null), { tier: "low", escalated: false });
+  assert.ok(S.buildReviewPrompt("user: hi").includes("user: hi"));
+});
+
 test("buildSession follows Block D", () => {
   const ids = S.buildSession(bank, []);
   const byId = Object.fromEntries(bank.items.map(i => [i.id, i]));

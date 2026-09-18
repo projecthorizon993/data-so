@@ -32,6 +32,8 @@ function buildPayload({ sessionId, studentHash, bank, records, result }) {
     category_scores: result.category_scores,
     composites: result.composites,
     risk_tier: result.tier,
+    tier_escalated_by_ai: !!result.escalated,
+    ai_review: result.review || null,
     flags: result.flags
   };
 }

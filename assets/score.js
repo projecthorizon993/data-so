@@ -205,6 +205,35 @@ function buildSession(bank, prevIds) {
   return attempt;
 }
 
-const api = { ANSWER_KEY, CRISIS_WORDS, parseValue, matchItemId, scoreSession, buildSession };
+/* ---------- AI review (second, smarter model) ----------
+   Deterministic score stays primary (Block E). The review model reads the
+   transcript and returns JSON; it may ESCALATE to crisis, never de-escalate. */
+const REVIEW_SYSTEM = "You are a clinical review assistant for a supervised campus screening pilot. Read the transcript and output JSON only, no other text: {\"summary\": \"1-2 sentences\", \"concerns\": [\"...\"], \"red_flags\": [\"...\"], \"suggested_tier\": \"low|elevated|crisis\", \"confidence\": \"low|medium|high\"}. Rules: never diagnose; base red_flags only on explicit self-harm language or safety answers; suggested_tier crisis only for explicit self-harm content.";
+
+function buildReviewPrompt(transcript) {
+  return `Screening transcript (user = student, assistant = screener):\n\n${transcript}\n\nReview it per your instructions. JSON only.`;
+}
+function parseReview(text) {
+  const m = String(text || "").match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    const j = JSON.parse(m[0]);
+    if (!["low", "elevated", "crisis"].includes(j.suggested_tier)) return null;
+    return {
+      summary: String(j.summary || "").slice(0, 500),
+      concerns: Array.isArray(j.concerns) ? j.concerns.map(String).slice(0, 8) : [],
+      red_flags: Array.isArray(j.red_flags) ? j.red_flags.map(String).slice(0, 8) : [],
+      suggested_tier: j.suggested_tier,
+      confidence: ["low", "medium", "high"].includes(j.confidence) ? j.confidence : "low"
+    };
+  } catch { return null; }
+}
+// Safety-first merge: AI may escalate to crisis, never lower the tier.
+function mergeTier(detTier, review) {
+  if (review && review.suggested_tier === "crisis") return { tier: "crisis", escalated: detTier !== "crisis" };
+  return { tier: detTier, escalated: false };
+}
+
+const api = { ANSWER_KEY, CRISIS_WORDS, parseValue, matchItemId, scoreSession, buildSession, REVIEW_SYSTEM, buildReviewPrompt, parseReview, mergeTier };
 if (typeof window !== "undefined") window.AuraScore = api;
 })();

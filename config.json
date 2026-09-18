@@ -3,6 +3,7 @@
   "model": "",
   "maxModelLen": 1024,
   "sheetsEndpoint": "https://script.google.com/macros/s/AKfycbxJUO_Zrs3HKCP9vRnB2jEJFZz4uMzx2yXLgAKCo_TLavty-8uH5mYy_UDIofqa-ezfUg/exec",
+  "reviewModel": "deepseek-ai/deepseek-v4-flash-0731",
   "idSalt": "change-me-before-pilot",
   "comment": "Same-origin /api/chat: served by worker.js on Cloudflare, or server.js locally."
 }
