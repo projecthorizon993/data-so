@@ -189,7 +189,9 @@ function linkSession(item) {
   advanceSession();
 }
 
-/* ---------- free-tier token budget: 6 turns, ~75% input / 512 out ---------- */
+/* ---------- free-tier token budget: 6 turns, ~75% input / 512 out ----------
+   Intake anchor: the first 2 turns (consent/age/faculty) are always kept,
+   so the model can't "forget" intake and restart the session. */
 const estTok = (s) => Math.ceil((s || "").length / 4);
 function budget(turns, sys) {
   const cap = Math.floor(CFG.maxLen * 0.75);
@@ -200,6 +202,11 @@ function budget(turns, sys) {
     const t = estTok(tail[i].content) + 4;
     if (total + t > cap) break;
     total += t; out.unshift(tail[i]);
+  }
+  for (const a of turns.slice(0, 2)) {
+    if (!out.includes(a) && total + estTok(a.content) + 4 <= cap) {
+      total += estTok(a.content) + 4; out.unshift(a);
+    }
   }
   return out; // system travels in the `system` field, not the array
 }
@@ -222,7 +229,8 @@ async function ask(prompt) {
   const item = session && !session.done ? currentItem() : null;
   let userContent = prompt;
   if (item) {
-    userContent = prompt + `\n\n[Protocol: present this exact screening item now, word-for-word, with nothing added before it except at most one short transition sentence. ITEM: "${item.prompt}"]`;
+    const asked = (session.ids || []).slice(0, session.idx).join(", ");
+    userContent = prompt + `\n\n[Protocol: accept the user's answer as-is in any wording and never refuse a benign reply. Present this exact screening item now, word-for-word, with nothing added before it except at most one short transition sentence. Do not re-ask intake already given in history. Already asked, never repeat: ${asked || "(none)"}. ITEM: "${item.prompt}"]`;
   }
   const messages = budget([...c.msgs.slice(-12), { role: "user", content: userContent }], SYSTEM);
   // Free-tier guard: small completion cap. Fixed prompt rides in `system`.

@@ -28,7 +28,7 @@ export default {
 
     const NIM_URL = (env.NIM_API_URL || "").trim();
     const NIM_KEY = (env.NIM_API_KEY || "").trim();
-    const NIM_MODEL = env.NIM_MODEL || "openai/gpt-oss-20b";
+    const NIM_MODEL = env.NIM_MODEL || "deepseek-ai/deepseek-v4-flash-0731";
     if (!NIM_URL) {
       return Response.json(
         { error: "misconfigured", detail: "Set NIM_API_URL (+ NIM_API_KEY) in Worker variables." },

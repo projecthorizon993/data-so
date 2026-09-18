@@ -11,7 +11,7 @@ services:
     environment:
       PORT: "3000"
       NIM_API_URL: "http://nim:8000/v1/chat/completions"
-      NIM_MODEL: "${NIM_MODEL:-openai/gpt-oss-20b}"
+      NIM_MODEL: "${NIM_MODEL:-deepseek-ai/deepseek-v4-flash-0731}"
       NIM_MAX_MODEL_LEN: "${NIM_MAX_MODEL_LEN:-1024}"
       NIM_API_KEY: "${NIM_API_KEY:-}"
     ports: ["3000:3000"]
