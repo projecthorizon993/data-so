@@ -191,8 +191,8 @@ function linkSession(item) {
 }
 
 /* ---------- free-tier token budget: 6 turns, ~75% input / 512 out ----------
-   Intake anchor: the first 2 turns (consent/age/faculty) are always kept,
-   so the model can't "forget" intake and restart the session. */
+   Intake anchor: the first 4 turns (start + intake Q + intake facts + first
+   item) are always kept, so the model can't "forget" intake and re-ask it. */
 const estTok = (s) => Math.ceil((s || "").length / 4);
 function budget(turns, sys) {
   const cap = Math.floor(CFG.maxLen * 0.75);
@@ -204,7 +204,7 @@ function budget(turns, sys) {
     if (total + t > cap) break;
     total += t; out.unshift(tail[i]);
   }
-  for (const a of turns.slice(0, 2)) {
+  for (const a of turns.slice(0, 4)) {
     if (!out.includes(a) && total + estTok(a.content) + 4 <= cap) {
       total += estTok(a.content) + 4; out.unshift(a);
     }

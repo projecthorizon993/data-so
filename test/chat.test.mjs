@@ -35,7 +35,7 @@ test("session runner + reset wiring present", () => {
   assert.match(js, /data-retry/);
   assert.match(js, /never repeat/); // protocol: no repeated items
   assert.match(js, /never refuse a benign/); // protocol: no false refusals
-  assert.match(js, /turns\.slice\(0, 2\)/); // intake anchor against context loss
+  assert.match(js, /turns\.slice\(0, 4\)/); // intake anchor against context loss
   assert.match(js, /60_000/); // client cap fits reasoning models
   assert.match(html, /sessResetBtn/);
   assert.match(html, /sessBadge/);
