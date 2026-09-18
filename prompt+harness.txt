@@ -9,7 +9,7 @@ Why this wording: identity + length (150) + format + honesty (never invent conta
 
 === BLOCK B: how to call the model (api/chat.js) ===
 POST /api/chat with JSON:
-{"system": "<system string from BLOCK A>", "messages": [{"role":"system","content":"<same system>"},{"role":"user","content":"..."}], "model": "meta/llama-3.1-8b-instruct", "stream": true, "max_tokens": 256}
+{"system": "<system string from BLOCK A>", "messages": [{"role":"system","content":"<same system>"},{"role":"user","content":"..."}], "model": "openai/gpt-oss-20b", "stream": true, "max_tokens": 256}
 Backend priority (api/chat.js): body.system wins, else embedded system message, else DEFAULT_SYSTEM. Exactly one system message upstream. Cap: system <=1500 chars, user turn <=4000 chars, max_tokens <=512. Upstream timeout 25s. Client streams SSE, AbortController stop, LRU cache repeats (assets/app.js).
 
 === BLOCK C: item bank (items.json, static config, edit wording without code) ===
