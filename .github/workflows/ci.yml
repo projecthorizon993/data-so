@@ -42,7 +42,6 @@ jobs:
   nim-image:
     needs: build
     runs-on: ubuntu-latest
-    if: hashFiles('Dockerfile') != ''
     steps:
       - uses: actions/checkout@v4
       - name: Login to GHCR
