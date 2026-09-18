@@ -4,3 +4,4 @@ out/
 npm-debug.log
 *.log
 data-so/
+.wrangler/

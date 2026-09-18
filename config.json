@@ -1,8 +1,8 @@
 {
-  "apiEndpoint": "https://data-so.lequangglobal.workers.dev/api/chat",
+  "apiEndpoint": "/api/chat",
   "model": "",
   "maxModelLen": 1024,
   "sheetsEndpoint": "",
   "idSalt": "change-me-before-pilot",
-  "comment": "GitHub Pages: set apiEndpoint to your backend/proxy URL (e.g. https://your-host:3000/api/chat). Same-origin /api/chat works when server.js serves the site."
+  "comment": "Same-origin /api/chat: served by worker.js on Cloudflare, or server.js locally."
 }

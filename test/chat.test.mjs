@@ -43,3 +43,12 @@ test("no Vercel leftovers (Pages-only hosting)", () => {
   const js = fs.readFileSync(new URL("../assets/app.js", import.meta.url), "utf8");
   assert.doesNotMatch(js, /Vercel URL/);
 });
+
+test("worker serves UI + API (Cloudflare single deploy)", () => {
+  const wr = JSON.parse(fs.readFileSync(new URL("../wrangler.jsonc", import.meta.url), "utf8"));
+  assert.equal(wr.main, "worker.js");
+  assert.equal(wr.assets.directory, "./out");
+  const wk = fs.readFileSync(new URL("../worker.js", import.meta.url), "utf8");
+  assert.match(wk, /env\.ASSETS/);
+  assert.match(wk, /\/api\/chat/);
+});

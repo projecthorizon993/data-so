@@ -17,7 +17,13 @@ export default {
   async fetch(req, env) {
     const url = new URL(req.url);
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
-    if (url.pathname !== "/api/chat" || req.method !== "POST")
+    // Static UI is served from ./out via the assets binding (wrangler.jsonc);
+    // anything that isn't the API falls through to it.
+    if (url.pathname !== "/api/chat") {
+      if (env.ASSETS) return env.ASSETS.fetch(req);
+      return Response.json({ error: "not found" }, { status: 404, headers: cors });
+    }
+    if (req.method !== "POST")
       return Response.json({ error: "not found" }, { status: 404, headers: cors });
 
     const NIM_URL = (env.NIM_API_URL || "").trim();

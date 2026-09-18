@@ -6,7 +6,7 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, "out");
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
-for (const f of ["index.html","config.json","chat.template.json","items.json","chat.template.jinja","manifest.webmanifest","sw.js","robots.txt","server.js","package.json"]) {
+for (const f of ["index.html","config.json","chat.template.json","items.json","chat.template.jinja","manifest.webmanifest","sw.js","robots.txt"]) {
   const src = path.join(root, f);
   if (fs.existsSync(src)) fs.copyFileSync(src, path.join(out, path.basename(f)));
 }
@@ -23,6 +23,10 @@ if (!Array.isArray(bank.items) || bank.items.length < 10) throw new Error("items
 const srv = fs.readFileSync(path.join(root, "server.js"), "utf8");
 if (!srv.includes("v1/chat/completions")) throw new Error("server.js must proxy NIM completions endpoint");
 if (!srv.includes("resolveSystem")) throw new Error("server.js must resolve the fixed system prompt");
+const wr = JSON.parse(fs.readFileSync(path.join(root, "wrangler.jsonc"), "utf8"));
+if (wr.main !== "worker.js" || wr.assets?.directory !== "./out") throw new Error("wrangler.jsonc must use worker.js + ./out assets");
+const wk = fs.readFileSync(path.join(root, "worker.js"), "utf8");
+if (!wk.includes("env.ASSETS")) throw new Error("worker.js must fall through to static assets");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 if (!html.includes("/api/chat")) throw new Error("index.html must reference /api/chat");
 const js = fs.readFileSync(path.join(root, "assets/app.js"), "utf8");
