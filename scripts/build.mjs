@@ -24,4 +24,7 @@ if (!api.includes('runtime = "edge"')) throw new Error("api/chat.js must use edg
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 if (!html.includes("/api/chat")) throw new Error("index.html must reference /api/chat");
 const js = fs.readFileSync(path.join(root, "assets/app.js"), "utf8");
+// Pages hardening: disable Jekyll (keeps _files + dotfiles), SPA fallback
+fs.writeFileSync(path.join(out, ".nojekyll"), "");
+fs.copyFileSync(path.join(out, "index.html"), path.join(out, "404.html"));
 console.log(`[build] ok — html=${html.length}B js=${js.length}B -> ./out`);
