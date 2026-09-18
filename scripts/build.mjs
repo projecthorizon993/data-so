@@ -10,7 +10,7 @@ for (const f of ["index.html","config.json","chat.template.json","items.json","c
   const src = path.join(root, f);
   if (fs.existsSync(src)) fs.copyFileSync(src, path.join(out, path.basename(f)));
 }
-for (const d of ["assets","api"]) {
+for (const d of ["assets","api","sheets"]) {
   const src = path.join(root, d);
   if (!fs.existsSync(src)) continue;
   fs.mkdirSync(path.join(out, d), { recursive: true });

@@ -39,6 +39,7 @@
       <div class="top-actions">
         <span id="latency" class="latency" title="Last response time">—</span>
         <button id="stopBtn" class="btn danger sm" type="button" hidden>■ Stop</button>
+        <button id="exportBtn" class="btn ghost sm" type="button" title="Score session + send to spreadsheet">⬆ Export</button>
         <button id="clearBtn" class="btn ghost sm" type="button">Clear</button>
       </div>
     </header>
@@ -62,6 +63,8 @@
 </div>
 <div id="toast" class="toast" role="alert" hidden></div>
 <noscript><p style="padding:1rem">JavaScript is required for streaming chat.</p></noscript>
+<script src="./assets/score.js" defer></script>
+<script src="./assets/export.js" defer></script>
 <script src="./assets/app.js" defer></script>
 </body>
 </html>

@@ -2,5 +2,7 @@
   "apiEndpoint": "/api/chat",
   "model": "",
   "maxModelLen": 1024,
-  "comment": "Vercel: keep /api/chat (Edge fn). Pure-static hosts: point at your proxy URL."
+  "sheetsEndpoint": "",
+  "idSalt": "change-me-before-pilot",
+  "comment": "sheetsEndpoint: Apps Script web-app /exec URL from sheets/Code.gs (empty = export disabled)."
 }
