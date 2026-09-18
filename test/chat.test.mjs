@@ -2,6 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 
+test("brand is AURA screening assistant", () => {
+  const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  assert.match(html, /AURA/);
+  assert.match(html, /Start screening/);
+  const tpl = JSON.parse(fs.readFileSync(new URL("../chat.template.json", import.meta.url), "utf8"));
+  assert.match(tpl.system, /AURA/);
+});
+
 test("chat template is short (low tokens)", () => {
   const t = JSON.parse(fs.readFileSync(new URL("../chat.template.json", import.meta.url), "utf8"));
   assert.ok(t.system.length > 10 && t.system.length < 2000, "system prompt must stay short");
@@ -13,10 +21,10 @@ test("frontend calls /api/chat with streaming + stop + cache", () => {
   assert.match(js, /text\/event-stream/);
   assert.match(js, /AbortController/);
   assert.match(js, /localStorage/);
-  assert.match(js, /system: sys/); // custom prompt rides in `system` field
+  assert.match(js, /system: SYSTEM/); // fixed prompt rides in `system` field
   assert.match(html, /\/api\/chat/);
   assert.match(html, /data-theme/);
-  assert.match(html, /promptInput/);
+  assert.doesNotMatch(html, /promptInput/); // prompt editor removed
 });
 
 test("backends accept custom system prompt (capped)", () => {

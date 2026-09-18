@@ -2,7 +2,7 @@
   "name": "nim-chat-static",
   "version": "1.0.0",
   "type": "module",
-  "description": "Fast static helpful chatbot with streaming replies",
+  "description": "AURA campus screening assistant",
   "scripts": {
     "start": "node server.js",
     "dev": "PORT=3000 node server.js",
