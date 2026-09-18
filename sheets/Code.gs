@@ -9,8 +9,8 @@ function doPost(e) {
   if (!sheet) {
     sheet = ss.insertSheet('results');
     sheet.appendRow(['timestamp', 'session_id', 'student_hash', 'bank_version',
-      'selected_item_ids', 'responses', 'category_scores', 'composites',
-      'risk_tier', 'flags']);
+      'selected_item_ids', 'responses', 'last_item_id', 'last_value', 'last_parsed',
+      'category_scores', 'composites', 'risk_tier', 'flags']);
   }
   const d = JSON.parse(e.postData.contents);
   sheet.appendRow([
@@ -20,6 +20,9 @@ function doPost(e) {
     d.bank_version || '',
     JSON.stringify(d.selected_item_ids || []),
     JSON.stringify(d.responses || []),
+    (d.last && d.last.item_id) || '',
+    (d.last && d.last.value) || '',
+    JSON.stringify((d.last && d.last.parsed) || null),
     JSON.stringify(d.category_scores || {}),
     JSON.stringify(d.composites || {}),
     d.risk_tier || '',

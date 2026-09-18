@@ -67,11 +67,16 @@ test("matchItemId links assistant text to bank item", () => {
 test("export payload shape (Block G)", () => {
   const { AuraExport: E } = load("export.js");
   const result = S.scoreSession([{ item_id: "MS-MOOD-01", user_text: "Somewhat", response_ms: 5 }], bank, bank.thresholds);
-  const p = E.buildPayload({ sessionId: "s1", studentHash: "abc", bank, records: [{ item_id: "MS-MOOD-01", user_text: "Somewhat", response_ms: 5 }], result });
+  const recs = [{ item_id: "MS-MOOD-01", user_text: "Somewhat", response_ms: 5, parsed: { value: 2, max: 4 } }];
+  const p = E.buildPayload({ sessionId: "s1", studentHash: "abc", bank, records: recs, result });
   assert.equal(p.session_id, "s1");
   assert.equal(p.risk_tier, result.tier);
   assert.ok(Array.isArray(p.selected_item_ids) && Array.isArray(p.responses));
   assert.ok(p.timestamp);
+  assert.equal(p.last.item_id, "MS-MOOD-01"); // latest prediction surfaced…
+  assert.equal(p.last.value, "Somewhat");
+  assert.equal(JSON.stringify(p.last.parsed), JSON.stringify({ value: 2, max: 4 })); // …with its score
+  assert.equal(JSON.stringify(p.responses[0].parsed), JSON.stringify({ value: 2, max: 4 }));
 });
 
 test("buildSession follows Block D", () => {

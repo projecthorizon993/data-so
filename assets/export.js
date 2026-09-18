@@ -18,7 +18,17 @@ function buildPayload({ sessionId, studentHash, bank, records, result }) {
     timestamp: new Date().toISOString(),
     bank_version: bank.version || "unknown",
     selected_item_ids: records.map(r => r.item_id).filter(Boolean),
-    responses: records.map(r => ({ item_id: r.item_id, value: r.user_text, response_time_ms: r.response_ms ?? null })),
+    responses: records.map(r => ({
+      item_id: r.item_id,
+      value: r.user_text,
+      parsed: r.parsed ?? null, // {value, max} from scorer, or null if unparseable
+      response_time_ms: r.response_ms ?? null
+    })),
+    last: records.length ? {
+      item_id: records[records.length - 1].item_id,
+      value: records[records.length - 1].user_text,
+      parsed: records[records.length - 1].parsed ?? null
+    } : null,
     category_scores: result.category_scores,
     composites: result.composites,
     risk_tier: result.tier,

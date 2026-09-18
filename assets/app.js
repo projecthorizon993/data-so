@@ -342,12 +342,21 @@ $("#exportBtn")?.addEventListener("click", async () => {
     const sid = prompt("Student ID (hashed before sending, never stored raw):");
     if (!sid || !sid.trim()) return;
     say("Scoring…");
+    const byId = Object.fromEntries((BANK.items || []).map(i => [i.id, i]));
+    const enriched = records.map(r => {
+      const it = byId[r.item_id];
+      let parsed = null;
+      try { parsed = it && window.AuraScore ? window.AuraScore.parseValue(it, r.user_text) : null; } catch {}
+      return { ...r, parsed };
+    });
     const result = window.AuraScore.scoreSession(records, BANK, BANK.thresholds || {});
     const studentHash = await window.AuraExport.hashId(sid, CFG.idSalt);
     const sessionId = "s" + Date.now().toString(36);
-    const payload = window.AuraExport.buildPayload({ sessionId, studentHash, bank: BANK, records, result });
+    const payload = window.AuraExport.buildPayload({ sessionId, studentHash, bank: BANK, records: enriched, result });
     await window.AuraExport.send(CFG.sheetsEndpoint, payload);
-    say(`Sent ✓ tier=${result.tier} (n=${records.length})`);
+    const last = payload.last;
+    const lastTxt = last ? `${last.item_id || "?"} = ${last.parsed ? `${last.parsed.value}/${last.parsed.max}` : JSON.stringify(last.value).slice(0, 24)}` : "—";
+    say(`Sent ✓ tier=${result.tier} · last: ${lastTxt}`);
   } catch (e) { say(String(e.message || e).slice(0, 80)); }
 });
 clearBtn.onclick = () => { const c = getCur(); if (c) { c.msgs = []; c.title = "New conversation"; persist(); renderList(); paint(); } cache.clear(); latencyEl.textContent = "—"; };
